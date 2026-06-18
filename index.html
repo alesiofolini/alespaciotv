@@ -774,16 +774,33 @@ document.addEventListener("click", e => {
 
 });
 
-cerrarModal.onclick = () =>
-  modalOverlay.classList.remove("visible");
+const modalOverlay =
+  document.getElementById("modalOverlay");
 
-modalOverlay.onclick = e => {
+const cerrarModal =
+  document.getElementById("cerrarModal");
+
+cerrarModal.addEventListener("click", () => {
+  modalOverlay.classList.remove("visible");
+});
+
+modalOverlay.addEventListener("click", e => {
 
   if(e.target === modalOverlay){
 
     modalOverlay.classList.remove("visible");
   }
-};
+
+});
+
+document.addEventListener("keydown", e => {
+
+  if(e.key === "Escape"){
+
+    modalOverlay.classList.remove("visible");
+  }
+
+});
 
 document.addEventListener("keydown", e => {
 
