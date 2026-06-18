@@ -774,39 +774,35 @@ document.addEventListener("click", e => {
 
 });
 
-const modalOverlay = document.getElementById("modalOverlay");
+const modalOverlay =
+  document.getElementById("modalOverlay");
 
-const cerrarModal = document.getElementById("cerrarModal");
+const cerrarModal =
+  document.getElementById("cerrarModal");
 
-cerrarModal.addEventListener("click", () => {
-  modalOverlay.classList.remove("visible");
-});
+if(cerrarModal && modalOverlay){
 
-modalOverlay.addEventListener("click", e => {
-
-  if(e.target === modalOverlay){
-
+  cerrarModal.addEventListener("click", () => {
     modalOverlay.classList.remove("visible");
-  }
+  });
 
-});
+  modalOverlay.addEventListener("click", e => {
 
-document.addEventListener("keydown", e => {
+    if(e.target === modalOverlay){
+      modalOverlay.classList.remove("visible");
+    }
 
-  if(e.key === "Escape"){
+  });
 
-    modalOverlay.classList.remove("visible");
-  }
+  document.addEventListener("keydown", e => {
 
-});
+    if(e.key === "Escape"){
+      modalOverlay.classList.remove("visible");
+    }
 
-document.addEventListener("keydown", e => {
+  });
 
-  if(e.key === "Escape"){
-
-    modalOverlay.classList.remove("visible");
-  }
-});
+}
 
 </script>
 
