@@ -418,183 +418,135 @@ function embedYoutube(url){
   return null;
 }
 
-async function abrirMision(id){
+const CACHE_KEY = "alespaciotv_launches";
+const CACHE_TTL = 10 * 60 * 1000;
 
-  const overlay =
-    document.getElementById("modalOverlay");
+function renderMisionContenido(m){
+  return `
+    ${
+      m.image
+      ? `<img class="mision-imagen" src="${m.image}">`
+      : ""
+    }
 
-  const contenido =
-    document.getElementById("contenidoMision");
+    <h2>${m.name}</h2>
+
+    <div class="mision-seccion">
+      <h3 class="mision-titulo">📖 DESCRIPCIÓN</h3>
+      <p>${m.mission?.description || "Información no disponible"}</p>
+    </div>
+
+    <div class="mision-seccion">
+      <h3 class="mision-titulo">🚀 COHETE</h3>
+      <p>${m.rocket?.configuration?.full_name || "Información no disponible"}</p>
+    </div>
+
+    <div class="mision-seccion">
+      <h3 class="mision-titulo">🏢 OPERADOR</h3>
+      <p>${m.launch_service_provider?.name || "Información no disponible"}</p>
+    </div>
+
+    <div class="mision-seccion">
+      <h3 class="mision-titulo">🛰️ TIPO DE MISIÓN</h3>
+      <p>${m.mission?.type || "Información no disponible"}</p>
+    </div>
+
+    <div class="mision-seccion">
+      <h3 class="mision-titulo">🌎 ÓRBITA</h3>
+      <p>${m.mission?.orbit?.name || "Información no disponible"}</p>
+    </div>
+
+    <div class="mision-seccion">
+      <h3 class="mision-titulo">📍 UBICACIÓN</h3>
+      <p>${m.pad?.name || "Información no disponible"}</p>
+    </div>
+
+    <div class="mision-seccion">
+      <h3 class="mision-titulo">📅 FECHA</h3>
+      <p>${new Date(m.net).toLocaleString("es-AR")}</p>
+    </div>
+
+    ${
+      m.vidURLs?.[0]?.url
+      ? `<a class="button" target="_blank" href="${m.vidURLs[0].url}">▶ VER TRANSMISIÓN</a>`
+      : ""
+    }
+  `;
+}
+
+function abrirMision(id){
+  const overlay = document.getElementById("modalOverlay");
+  const contenido = document.getElementById("contenidoMision");
 
   overlay.classList.add("visible");
 
-  contenido.innerHTML =
-    "Cargando información de misión...";
+  const m = lanzamientos.find(l => l.id === id);
 
+  if(!m){
+    contenido.innerHTML = "No se encontró la misión.";
+    return;
+  }
+
+  contenido.innerHTML = renderMisionContenido(m);
+}
+
+function leerCache(){
   try{
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if(!raw) return null;
 
-    const res =
-      await fetch(
-        `https://ll.thespacedevs.com/2.2.0/launch/${id}/`
-      );
+    const { ts, results } = JSON.parse(raw);
+    if(Date.now() - ts > CACHE_TTL) return null;
 
-    const m =
-      await res.json();
-
-    contenido.innerHTML = `
-
-      ${
-        m.image
-        ?
-        `<img
-            class="mision-imagen"
-            src="${m.image}">`
-        :
-        ""
-      }
-
-      <h2>${m.name}</h2>
-
-      <div class="mision-seccion">
-
-        <h3 class="mision-titulo">
-          📖 DESCRIPCIÓN
-        </h3>
-
-        <p>
-          ${
-            m.mission?.description ||
-            "Información no disponible"
-          }
-        </p>
-
-      </div>
-
-      <div class="mision-seccion">
-
-        <h3 class="mision-titulo">
-          🚀 COHETE
-        </h3>
-
-        <p>
-          ${
-            m.rocket?.configuration?.full_name ||
-            "Información no disponible"
-          }
-        </p>
-
-      </div>
-
-      <div class="mision-seccion">
-
-        <h3 class="mision-titulo">
-          🏢 OPERADOR
-        </h3>
-
-        <p>
-          ${
-            m.launch_service_provider?.name ||
-            "Información no disponible"
-          }
-        </p>
-
-      </div>
-
-      <div class="mision-seccion">
-
-        <h3 class="mision-titulo">
-          🛰️ TIPO DE MISIÓN
-        </h3>
-
-        <p>
-          ${
-            m.mission?.type ||
-            "Información no disponible"
-          }
-        </p>
-
-      </div>
-
-      <div class="mision-seccion">
-
-        <h3 class="mision-titulo">
-          🌎 ÓRBITA
-        </h3>
-
-        <p>
-          ${
-            m.mission?.orbit?.name ||
-            "Información no disponible"
-          }
-        </p>
-
-      </div>
-
-      <div class="mision-seccion">
-
-        <h3 class="mision-titulo">
-          📍 UBICACIÓN
-        </h3>
-
-        <p>
-          ${
-            m.pad?.name ||
-            "Información no disponible"
-          }
-        </p>
-
-      </div>
-
-      <div class="mision-seccion">
-
-        <h3 class="mision-titulo">
-          📅 FECHA
-        </h3>
-
-        <p>
-          ${new Date(m.net).toLocaleString("es-AR")}
-        </p>
-
-      </div>
-
-      ${
-        m.vidURLs?.[0]?.url
-        ?
-        `
-        <a
-          class="button"
-          target="_blank"
-          href="${m.vidURLs[0].url}">
-          ▶ VER TRANSMISIÓN
-        </a>
-        `
-        :
-        ""
-      }
-
-    `;
-
-  }catch(error){
-
-    contenido.innerHTML =
-      "No se pudo cargar la misión.";
-
+    return results;
+  }catch{
+    return null;
   }
 }
 
+function guardarCache(results){
+  try{
+    sessionStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({ ts: Date.now(), results })
+    );
+  }catch{}
+}
+
 async function cargarDatos(){
+  const cached = leerCache();
 
-  const res = await fetch(
-    "https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=30"
-  );
+  if(cached?.length){
+    lanzamientos = cached;
+    actualizarEstadisticas();
+    renderHero();
+    renderTarjetas();
+    return;
+  }
 
-  const data = await res.json();
+  try{
+    const res = await fetch(
+      "https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=30"
+    );
 
-  lanzamientos = data.results;
+    if(!res.ok){
+      throw new Error(res.status === 429
+        ? "Límite de consultas alcanzado. Intentá de nuevo en unos minutos."
+        : `Error ${res.status}`);
+    }
 
-  actualizarEstadisticas();
-  renderHero();
-  renderTarjetas();
+    const data = await res.json();
+    lanzamientos = data.results;
+
+    guardarCache(lanzamientos);
+    actualizarEstadisticas();
+    renderHero();
+    renderTarjetas();
+  }catch(error){
+    launches.className = "loading";
+    launches.textContent = error.message ||
+      "No se pudo conectar con la red de satélites.";
+  }
 }
 
 function actualizarEstadisticas(){
