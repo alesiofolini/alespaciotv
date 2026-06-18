@@ -213,6 +213,19 @@ iframe{
   border:1px solid rgba(0,229,255,.15);
   border-radius:18px;
   overflow:hidden;
+  cursor:pointer;
+  transition:border-color .2s, transform .2s, box-shadow .2s;
+}
+
+.card:hover{
+  border-color:rgba(0,229,255,.4);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,229,255,.12);
+}
+
+.card:focus-visible{
+  outline:2px solid var(--cian);
+  outline-offset:2px;
 }
 
 .card img{
@@ -338,6 +351,11 @@ footer{
   color:var(--cian);
   margin-bottom:8px;
 }
+
+.mision-seccion p.traduciendo{
+  color:var(--gris);
+  font-style:italic;
+}
 </style>
 </head>
 <body>
@@ -395,6 +413,13 @@ footer{
   AL ESPACIO TV • CENTRO DE CONTROL ESPACIAL
 </footer>
 
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal">
+    <button id="cerrarModal" class="cerrar-modal" type="button">✕</button>
+    <div id="contenidoMision">Cargando misión...</div>
+  </div>
+</div>
+
 <script>
 
 let lanzamientos = [];
@@ -420,8 +445,85 @@ function embedYoutube(url){
 
 const CACHE_KEY = "alespaciotv_launches";
 const CACHE_TTL = 10 * 60 * 1000;
+const TRADUCCION_CACHE_KEY = "alespaciotv_traducciones";
+
+function leerTraduccionCache(){
+  try{
+    return JSON.parse(sessionStorage.getItem(TRADUCCION_CACHE_KEY) || "{}");
+  }catch{
+    return {};
+  }
+}
+
+function guardarTraduccionCache(original, traducido){
+  try{
+    const cache = leerTraduccionCache();
+    cache[original] = traducido;
+    sessionStorage.setItem(TRADUCCION_CACHE_KEY, JSON.stringify(cache));
+  }catch{}
+}
+
+function dividirTexto(texto, maxBytes){
+  const encoder = new TextEncoder();
+  if(encoder.encode(texto).length <= maxBytes) return [texto];
+
+  const partes = [];
+  let resto = texto;
+
+  while(resto){
+    if(encoder.encode(resto).length <= maxBytes){
+      partes.push(resto);
+      break;
+    }
+
+    let slice = resto;
+    while(encoder.encode(slice).length > maxBytes && slice.length > 0){
+      slice = slice.slice(0, -1);
+    }
+
+    const ultimoEspacio = slice.lastIndexOf(" ");
+    if(ultimoEspacio > slice.length * 0.4){
+      slice = slice.slice(0, ultimoEspacio);
+    }
+
+    partes.push(slice.trim());
+    resto = resto.slice(slice.length).trimStart();
+  }
+
+  return partes.filter(Boolean);
+}
+
+async function traducirAlEspanol(texto){
+  if(!texto?.trim()) return texto;
+
+  const cache = leerTraduccionCache();
+  if(cache[texto]) return cache[texto];
+
+  const chunks = dividirTexto(texto, 480);
+  const traducidos = [];
+
+  for(let i = 0; i < chunks.length; i++){
+    if(i > 0) await new Promise(r => setTimeout(r, 250));
+
+    const url = new URL("https://api.mymemory.translated.net/get");
+    url.searchParams.set("q", chunks[i]);
+    url.searchParams.set("langpair", "en|es");
+
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("traducción fallida");
+
+    const data = await res.json();
+    traducidos.push(data.responseData?.translatedText || chunks[i]);
+  }
+
+  const resultado = traducidos.join(" ");
+  guardarTraduccionCache(texto, resultado);
+  return resultado;
+}
 
 function renderMisionContenido(m){
+  const descripcion = m.mission?.description;
+
   return `
     ${
       m.image
@@ -433,7 +535,9 @@ function renderMisionContenido(m){
 
     <div class="mision-seccion">
       <h3 class="mision-titulo">📖 DESCRIPCIÓN</h3>
-      <p>${m.mission?.description || "Información no disponible"}</p>
+      <p id="mision-descripcion" class="${descripcion ? "traduciendo" : ""}">
+        ${descripcion ? "Traduciendo..." : "Información no disponible"}
+      </p>
     </div>
 
     <div class="mision-seccion">
@@ -488,6 +592,23 @@ function abrirMision(id){
   }
 
   contenido.innerHTML = renderMisionContenido(m);
+
+  const descripcionEl = document.getElementById("mision-descripcion");
+  const descripcionOriginal = m.mission?.description;
+
+  if(!descripcionEl || !descripcionOriginal) return;
+
+  traducirAlEspanol(descripcionOriginal)
+    .then(traducida => {
+      if(!document.getElementById("mision-descripcion")) return;
+      descripcionEl.textContent = traducida;
+      descripcionEl.classList.remove("traduciendo");
+    })
+    .catch(() => {
+      if(!document.getElementById("mision-descripcion")) return;
+      descripcionEl.textContent = descripcionOriginal;
+      descripcionEl.classList.remove("traduciendo");
+    });
 }
 
 function leerCache(){
@@ -618,9 +739,9 @@ function renderTarjetas(){
     const video = l.vidURLs?.[0]?.url;
 
     launches.innerHTML += `
-      <div class="card">
+      <div class="card" data-id="${l.id}" role="button" tabindex="0" aria-label="Ver misión ${l.name}">
 
-        <img src="${imagen}">
+        <img src="${imagen}" alt="">
 
         <div class="card-body">
 
@@ -647,14 +768,8 @@ function renderTarjetas(){
             Calculando...
           </div>
 
-          <button
-              class="button ver-mision"
-              data-id="${l.id}">
-              🚀 VER MISIÓN
-          </button>
-
           ${video ? `
-            <a class="button" href="${video}" target="_blank">
+            <a class="button" href="${video}" target="_blank" rel="noopener">
               ▶ VER EN VIVO
             </a>
           ` : ""}
@@ -712,18 +827,18 @@ cargarDatos();
 setInterval(actualizarCountdowns,1000);
 
 document.addEventListener("click", e => {
+  if(e.target.closest("a")) return;
 
-  if(
-    e.target.classList.contains(
-      "ver-mision"
-    )
-  ){
+  const card = e.target.closest(".card[data-id]");
+  if(card) abrirMision(card.dataset.id);
+});
 
-    abrirMision(
-      e.target.dataset.id
-    );
+document.addEventListener("keydown", e => {
+  const card = e.target.closest?.(".card[data-id]");
+  if(card && (e.key === "Enter" || e.key === " ")){
+    e.preventDefault();
+    abrirMision(card.dataset.id);
   }
-
 });
 
 const modalOverlay =
@@ -757,20 +872,5 @@ if(cerrarModal && modalOverlay){
 }
 
 </script>
-
-
-<div id="modalOverlay" class="modal-overlay">
-  <div class="modal">
-
-    <button id="cerrarModal" class="cerrar-modal">
-      ✕
-    </button>
-
-    <div id="contenidoMision">
-      Cargando misión...
-    </div>
-
-  </div>
-</div>
 </body>
 </html>
