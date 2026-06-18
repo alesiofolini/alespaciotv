@@ -272,6 +272,72 @@ footer{
   padding:30px;
   border-top:1px solid rgba(0,229,255,.15);
 }
+
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  backdrop-filter:blur(8px);
+
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  z-index:9999;
+}
+
+.modal-overlay.visible{
+  display:flex;
+}
+
+.modal{
+  width:min(900px,95%);
+  max-height:90vh;
+
+  overflow-y:auto;
+
+  background:#081120;
+
+  border:1px solid rgba(0,229,255,.2);
+
+  border-radius:20px;
+
+  padding:25px;
+
+  box-shadow:
+    0 0 30px rgba(0,229,255,.15);
+}
+
+.cerrar-modal{
+  float:right;
+
+  border:none;
+
+  background:none;
+
+  color:white;
+
+  font-size:1.5rem;
+
+  cursor:pointer;
+}
+
+.mision-imagen{
+  width:100%;
+  max-height:350px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:20px;
+}
+
+.mision-seccion{
+  margin-top:18px;
+}
+
+.mision-titulo{
+  color:var(--cian);
+  margin-bottom:8px;
+}
 </style>
 </head>
 <body>
@@ -350,6 +416,170 @@ function embedYoutube(url){
   }
 
   return null;
+}
+
+async function abrirMision(id){
+
+  const overlay =
+    document.getElementById("modalOverlay");
+
+  const contenido =
+    document.getElementById("contenidoMision");
+
+  overlay.classList.add("visible");
+
+  contenido.innerHTML =
+    "Cargando información de misión...";
+
+  try{
+
+    const res =
+      await fetch(
+        `https://ll.thespacedevs.com/2.2.0/launch/${id}/`
+      );
+
+    const m =
+      await res.json();
+
+    contenido.innerHTML = `
+
+      ${
+        m.image
+        ?
+        `<img
+            class="mision-imagen"
+            src="${m.image}">`
+        :
+        ""
+      }
+
+      <h2>${m.name}</h2>
+
+      <div class="mision-seccion">
+
+        <h3 class="mision-titulo">
+          📖 DESCRIPCIÓN
+        </h3>
+
+        <p>
+          ${
+            m.mission?.description ||
+            "Información no disponible"
+          }
+        </p>
+
+      </div>
+
+      <div class="mision-seccion">
+
+        <h3 class="mision-titulo">
+          🚀 COHETE
+        </h3>
+
+        <p>
+          ${
+            m.rocket?.configuration?.full_name ||
+            "Información no disponible"
+          }
+        </p>
+
+      </div>
+
+      <div class="mision-seccion">
+
+        <h3 class="mision-titulo">
+          🏢 OPERADOR
+        </h3>
+
+        <p>
+          ${
+            m.launch_service_provider?.name ||
+            "Información no disponible"
+          }
+        </p>
+
+      </div>
+
+      <div class="mision-seccion">
+
+        <h3 class="mision-titulo">
+          🛰️ TIPO DE MISIÓN
+        </h3>
+
+        <p>
+          ${
+            m.mission?.type ||
+            "Información no disponible"
+          }
+        </p>
+
+      </div>
+
+      <div class="mision-seccion">
+
+        <h3 class="mision-titulo">
+          🌎 ÓRBITA
+        </h3>
+
+        <p>
+          ${
+            m.mission?.orbit?.name ||
+            "Información no disponible"
+          }
+        </p>
+
+      </div>
+
+      <div class="mision-seccion">
+
+        <h3 class="mision-titulo">
+          📍 UBICACIÓN
+        </h3>
+
+        <p>
+          ${
+            m.pad?.name ||
+            "Información no disponible"
+          }
+        </p>
+
+      </div>
+
+      <div class="mision-seccion">
+
+        <h3 class="mision-titulo">
+          📅 FECHA
+        </h3>
+
+        <p>
+          ${new Date(m.net).toLocaleString("es-AR")}
+        </p>
+
+      </div>
+
+      ${
+        m.vidURLs?.[0]?.url
+        ?
+        `
+        <a
+          class="button"
+          target="_blank"
+          href="${m.vidURLs[0].url}">
+          ▶ VER TRANSMISIÓN
+        </a>
+        `
+        :
+        ""
+      }
+
+    `;
+
+  }catch(error){
+
+    contenido.innerHTML =
+      "No se pudo cargar la misión.";
+
+  }
 }
 
 async function cargarDatos(){
@@ -523,7 +753,55 @@ document.querySelectorAll(".filtro")
 cargarDatos();
 setInterval(actualizarCountdowns,1000);
 
+document.addEventListener("click", e => {
+
+  if(
+    e.target.classList.contains(
+      "ver-mision"
+    )
+  ){
+
+    abrirMision(
+      e.target.dataset.id
+    );
+  }
+
+});
+
+cerrarModal.onclick = () =>
+  modalOverlay.classList.remove("visible");
+
+modalOverlay.onclick = e => {
+
+  if(e.target === modalOverlay){
+
+    modalOverlay.classList.remove("visible");
+  }
+};
+
+document.addEventListener("keydown", e => {
+
+  if(e.key === "Escape"){
+
+    modalOverlay.classList.remove("visible");
+  }
+});
+
 </script>
 
+
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal">
+
+    <button id="cerrarModal" class="cerrar-modal">
+      ✕
+    </button>
+
+    <div id="contenidoMision">
+      Cargando misión...
+    </div>
+
+  </div>
+</div>
 </body>
 </html>
