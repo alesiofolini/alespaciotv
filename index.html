@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚀 Al Espacio TV</title>
+
+<script>
+(() => {
+  const iconos = ["🚀","🛰️","🪐","🌕","☄️","🌎","🌌","⭐"];
+  const icono = iconos[Math.floor(Math.random() * iconos.length)];
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <text y=".9em" font-size="90">${icono}</text>
+    </svg>
+  `;
+
+  const link = document.createElement("link");
+  link.rel = "icon";
+  link.href = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+  document.head.appendChild(link);
+})();
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --fondo:#020617;
+  --panel:#0f172a;
+  --cian:#00e5ff;
+  --verde:#00ff88;
+  --violeta:#7c3aed;
+  --texto:#e2e8f0;
+  --gris:#94a3b8;
+  --rojo:#ff4d6d;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Orbitron',sans-serif;
+  background:var(--fondo);
+  color:var(--texto);
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background:
+  radial-gradient(circle at 20% 20%, rgba(124,58,237,.25), transparent 30%),
+  radial-gradient(circle at 80% 30%, rgba(0,229,255,.18), transparent 30%),
+  radial-gradient(circle at 50% 80%, rgba(0,255,136,.08), transparent 40%);
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  opacity:.25;
+  background-image:
+    radial-gradient(white 1px, transparent 1px);
+  background-size:120px 120px;
+}
+
+header{
+  position:sticky;
+  top:0;
+  backdrop-filter:blur(10px);
+  background:rgba(2,6,23,.9);
+  border-bottom:1px solid rgba(0,229,255,.2);
+}
+
+.header{
+  width:min(1400px,95%);
+  margin:auto;
+  padding:20px;
+}
+
+.logo{
+  color:var(--cian);
+  font-size:2rem;
+  font-weight:800;
+  text-shadow:0 0 15px var(--cian);
+}
+
+.subtitulo{
+  color:var(--gris);
+  margin-top:6px;
+}
+
+.estado{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+
+.badge{
+  border:1px solid rgba(0,229,255,.2);
+  padding:6px 10px;
+  border-radius:999px;
+  color:var(--cian);
+  font-size:.75rem;
+}
+
+.container{
+  width:min(1400px,95%);
+  margin:auto;
+}
+
+.hero{
+  margin-top:20px;
+  border:1px solid rgba(0,229,255,.2);
+  border-radius:20px;
+  overflow:hidden;
+  background:rgba(15,23,42,.8);
+}
+
+.hero-header{
+  padding:12px 18px;
+  background:rgba(255,77,109,.15);
+  color:#ff9cb0;
+}
+
+.hero-content{
+  padding:20px;
+}
+
+iframe{
+  width:100%;
+  aspect-ratio:16/9;
+  border:none;
+  border-radius:12px;
+}
+
+.hero-title{
+  margin-top:15px;
+  font-size:1.4rem;
+}
+
+.hero-provider{
+  margin-top:8px;
+  color:var(--cian);
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin:25px 0;
+}
+
+.stat{
+  background:rgba(15,23,42,.8);
+  border:1px solid rgba(0,229,255,.15);
+  border-radius:15px;
+  padding:18px;
+}
+
+.stat-title{
+  color:var(--gris);
+  font-size:.8rem;
+}
+
+.stat-value{
+  margin-top:10px;
+  font-size:2rem;
+  color:var(--verde);
+}
+
+.filtros{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:20px 0;
+}
+
+.filtro{
+  border:none;
+  cursor:pointer;
+  padding:10px 16px;
+  border-radius:999px;
+  font-family:inherit;
+  background:#081120;
+  color:var(--cian);
+}
+
+.filtro.activo{
+  background:var(--cian);
+  color:black;
+}
+
+.titulo-seccion{
+  margin:20px 0;
+  color:var(--cian);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+  gap:20px;
+  margin-bottom:40px;
+}
+
+.card{
+  background:rgba(15,23,42,.9);
+  border:1px solid rgba(0,229,255,.15);
+  border-radius:18px;
+  overflow:hidden;
+}
+
+.card img{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+}
+
+.card-body{
+  padding:18px;
+}
+
+.label{
+  color:var(--gris);
+  font-size:.75rem;
+  margin-top:12px;
+}
+
+.provider{
+  color:var(--cian);
+}
+
+.status{
+  display:inline-block;
+  margin-top:10px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,255,136,.25);
+  color:var(--verde);
+}
+
+.countdown{
+  margin-top:15px;
+  font-size:1.2rem;
+  color:var(--verde);
+}
+
+.button{
+  display:inline-block;
+  margin-top:15px;
+  text-decoration:none;
+  background:var(--cian);
+  color:black;
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+.loading{
+  text-align:center;
+  padding:60px;
+}
+
+footer{
+  text-align:center;
+  color:var(--gris);
+  padding:30px;
+  border-top:1px solid rgba(0,229,255,.15);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header">
+    <div class="logo">🚀 AL ESPACIO TV</div>
+    <div class="subtitulo">CENTRO DE CONTROL ESPACIAL</div>
+
+    <div class="estado">
+      <div class="badge">● RED ACTIVA</div>
+      <div class="badge">TELEMETRÍA EN LÍNEA</div>
+      <div class="badge">SEGUIMIENTO DE MISIONES</div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div id="hero"></div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-title">MISIONES PROGRAMADAS</div>
+      <div id="launchCount" class="stat-value">-</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">TRANSMISIONES DISPONIBLES</div>
+      <div id="videoCount" class="stat-value">-</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">PRÓXIMO DESPEGUE</div>
+      <div id="nextLaunch" class="stat-value">-</div>
+    </div>
+  </div>
+
+  <div class="filtros">
+    <button class="filtro activo" data-filter="all">TODAS</button>
+    <button class="filtro" data-filter="spacex">SPACEX</button>
+    <button class="filtro" data-filter="rocket lab">ROCKET LAB</button>
+    <button class="filtro" data-filter="nasa">NASA</button>
+  </div>
+
+  <h2 class="titulo-seccion">🚀 PRÓXIMAS MISIONES</h2>
+
+  <div id="launches" class="loading">
+    ESTABLECIENDO COMUNICACIÓN CON LA RED DE SATÉLITES...
+  </div>
+
+</div>
+
+<footer>
+  AL ESPACIO TV • CENTRO DE CONTROL ESPACIAL
+</footer>
+
+<script>
+
+let lanzamientos = [];
+let filtroActual = "all";
+
+function embedYoutube(url){
+  if(!url) return null;
+
+  const patrones = [
+    /v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /live\/([^?]+)/,
+    /embed\/([^?]+)/
+  ];
+
+  for(const p of patrones){
+    const m = url.match(p);
+    if(m) return `https://www.youtube.com/embed/${m[1]}`;
+  }
+
+  return null;
+}
+
+async function cargarDatos(){
+
+  const res = await fetch(
+    "https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=30"
+  );
+
+  const data = await res.json();
+
+  lanzamientos = data.results;
+
+  actualizarEstadisticas();
+  renderHero();
+  renderTarjetas();
+}
+
+function actualizarEstadisticas(){
+
+  launchCount.textContent = lanzamientos.length;
+
+  videoCount.textContent =
+    lanzamientos.filter(x => x.vidURLs?.length).length;
+
+  if(lanzamientos.length){
+    const horas = Math.floor(
+      (new Date(lanzamientos[0].net) - new Date()) / 3600000
+    );
+    nextLaunch.textContent = horas + "h";
+  }
+}
+
+function renderHero(){
+
+  const destacado =
+    lanzamientos.find(x => x.vidURLs?.length);
+
+  if(!destacado) return;
+
+  const embed = embedYoutube(destacado.vidURLs[0].url);
+
+  hero.innerHTML = `
+    <div class="hero">
+      <div class="hero-header">
+        🔴 TRANSMISIÓN DESTACADA
+      </div>
+
+      <div class="hero-content">
+
+        ${embed ? `<iframe src="${embed}" allowfullscreen></iframe>` : ""}
+
+        <div class="hero-title">${destacado.name}</div>
+
+        <div class="hero-provider">
+          ${destacado.launch_service_provider?.name || ""}
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+function renderTarjetas(){
+
+  let lista = [...lanzamientos];
+
+  if(filtroActual !== "all"){
+    lista = lista.filter(x =>
+      (x.launch_service_provider?.name || "")
+      .toLowerCase()
+      .includes(filtroActual)
+    );
+  }
+
+  launches.className = "grid";
+  launches.innerHTML = "";
+
+  lista.forEach(l => {
+
+    const imagen =
+      l.image ||
+      "https://images.unsplash.com/photo-1516849841032-87cbac4d88f7?w=1200";
+
+    const video = l.vidURLs?.[0]?.url;
+
+    launches.innerHTML += `
+      <div class="card">
+
+        <img src="${imagen}">
+
+        <div class="card-body">
+
+          <h3>${l.name}</h3>
+
+          <div class="label">OPERADOR</div>
+          <div class="provider">
+            ${l.launch_service_provider?.name || "Desconocido"}
+          </div>
+
+          <div class="label">ESTADO</div>
+          <div class="status">
+            ${l.status?.name || "Sin datos"}
+          </div>
+
+          <div class="label">VENTANA DE LANZAMIENTO</div>
+          <div>
+            ${new Date(l.net).toLocaleString("es-AR", {
+              timeZone:"America/Argentina/Buenos_Aires"
+            })}
+          </div>
+
+          <div class="countdown" data-date="${l.net}">
+            Calculando...
+          </div>
+
+          ${video ? `
+            <a class="button" href="${video}" target="_blank">
+              ▶ VER EN VIVO
+            </a>
+          ` : ""}
+
+        </div>
+
+      </div>
+    `;
+  });
+
+  actualizarCountdowns();
+}
+
+function actualizarCountdowns(){
+
+  document.querySelectorAll(".countdown")
+  .forEach(el => {
+
+    const diff =
+      new Date(el.dataset.date) - new Date();
+
+    if(diff <= 0){
+      el.textContent = "🚀 DESPEGUE EN CURSO";
+      return;
+    }
+
+    const d = Math.floor(diff/86400000);
+    const h = Math.floor((diff%86400000)/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    const s = Math.floor((diff%60000)/1000);
+
+    el.textContent =
+      `T-${d}D ${h}H ${m}M ${s}S`;
+  });
+}
+
+document.querySelectorAll(".filtro")
+.forEach(btn => {
+
+  btn.onclick = () => {
+
+    document
+      .querySelectorAll(".filtro")
+      .forEach(b => b.classList.remove("activo"));
+
+    btn.classList.add("activo");
+
+    filtroActual = btn.dataset.filter;
+
+    renderTarjetas();
+  };
+});
+
+cargarDatos();
+setInterval(actualizarCountdowns,1000);
+
+</script>
+
+</body>
+</html>
