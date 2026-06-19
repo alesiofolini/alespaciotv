@@ -216,60 +216,33 @@ header::after{
 }
 
 .subtitulo{
-  font-family:var(--mono);
+  font-family:var(--body);
   color:var(--texto-dim);
-  margin-top:6px;
-  font-size:.78rem;
-  letter-spacing:.25em;
-  text-transform:uppercase;
+  margin-top:8px;
+  font-size:.88rem;
+  font-weight:400;
+  line-height:1.4;
+  letter-spacing:.02em;
+}
+
+.subtitulo strong{
+  color:var(--texto);
+  font-weight:500;
 }
 
 .hud-clock{
   font-family:var(--mono);
-  font-size:.75rem;
-  color:var(--cian);
+  font-size:.72rem;
+  color:var(--texto-dim);
   text-align:right;
-  letter-spacing:.1em;
-  opacity:.8;
-  padding-top:4px;
-}
-
-.estado{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:14px;
-  width:100%;
-}
-
-.badge{
-  font-family:var(--mono);
-  font-size:.65rem;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  padding:5px 12px;
-  border:1px solid var(--borde);
-  background:var(--cian-dim);
-  color:var(--cian);
-  position:relative;
-  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-}
-
-.badge::before{
-  content:"";
-  display:inline-block;
-  width:6px;height:6px;
-  border-radius:50%;
-  background:var(--verde);
-  margin-right:6px;
-  box-shadow:0 0 8px var(--verde);
-  animation:pulse-dot 2s ease-in-out infinite;
-  vertical-align:middle;
+  letter-spacing:.08em;
+  padding-top:6px;
+  white-space:nowrap;
 }
 
 @keyframes pulse-dot{
-  0%,100%{opacity:1;box-shadow:0 0 8px var(--verde)}
-  50%{opacity:.5;box-shadow:0 0 4px var(--verde)}
+  0%,100%{opacity:1;box-shadow:0 0 12px var(--rojo)}
+  50%{opacity:.5;box-shadow:0 0 4px var(--rojo)}
 }
 
 /* ── LAYOUT ── */
@@ -847,15 +820,9 @@ footer::before{
     <div class="hud-top">
       <div class="logo-block">
         <div class="logo">AL ESPACIO TV</div>
-        <div class="subtitulo">Centro de control espacial · misión activa</div>
+        <p class="subtitulo">Próximos despegues espaciales · countdown y transmisiones en vivo</p>
       </div>
       <div class="hud-clock" id="hudClock">--:--:-- UTC</div>
-    </div>
-
-    <div class="estado">
-      <div class="badge">RED ACTIVA</div>
-      <div class="badge">TELEMETRÍA EN LÍNEA</div>
-      <div class="badge">SEGUIMIENTO DE MISIONES</div>
     </div>
   </div>
 </header>
